@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Vot — Balul Bobocilor</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box;
+           background: #0e0b1a; color: #f5f0ff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; text-align: center; }
+    .card { max-width: 420px; background: #1e1835; border: 1px solid #3a3060; border-radius: 18px; padding: 28px 22px; }
+    h1 { font-family: Georgia, serif; font-size: 1.4rem; margin: 0 0 10px; }
+    p { color: #b9aed6; line-height: 1.5; margin: 0; }
+    a { color: #f2c95c; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="titlu">Se deschide pagina de vot…</h1>
+    <p id="text">O secundă.</p>
+  </div>
+  <script>
+    // Pagina asta NU se modifica. In seara balului schimbi doar fisierul adresa.txt.
+    (function () {
+      // codul de pe bilet vine dupa "#" si il trimitem mai departe, tot dupa "#"
+      var cod = location.hash.replace(/[^A-Za-z0-9]/g, '').slice(0, 8);
+      function arata(titlu, text) {
+        document.getElementById('titlu').textContent = titlu;
+        document.getElementById('text').textContent = text;
+      }
+      // ?t=... ca telefonul sa nu foloseasca o adresa veche din memorie
+      fetch('adresa.txt?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (t) {
+          var adresa = t.trim().replace(/\/+$/, '');
+          if (!/^https:\/\/[a-z0-9.\-]+$/i.test(adresa)) {
+            arata('Votul nu a început încă', 'Păstrează biletul și scanează din nou codul când se anunță votul.');
+            return;
+          }
+          location.replace(adresa + '/' + (cod ? '#' + cod : ''));
+        })
+        .catch(function () {
+          arata('Nu ne putem conecta', 'Verifică internetul și scanează din nou codul.');
+        });
+    })();
+  </script>
+</body>
+</html>
